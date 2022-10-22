@@ -23,7 +23,6 @@ function App() {
   };
 
   function submitSuggestion() {
-    // var input = document.getElementById("SuggestionText")?.value;
     alert(suggestion);
   }
   function suggestionInputChange(event:ChangeEvent<HTMLInputElement>) {
