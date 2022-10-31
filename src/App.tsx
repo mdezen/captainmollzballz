@@ -2,35 +2,91 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import './App.css'
 
 type resultProps = {
-  statusCode: number;
-  body: string;
+  yesCount: number;
+  noCount: number;
 };
 
-
 function App() {
-  const [count, setCount] = useState(0);
   const [result, setResult] = useState<resultProps>();
   const [suggestion, setSuggestion] = useState<string>('');
+  const [vote, setVote] = useState<string>();
 
-  async function getStatus() {
-    const data = await fetch("https://0wbaztinr8.execute-api.us-east-1.amazonaws.com/prod/suggestion", {
+  async function postSuggestion() {
+    await fetch("https://0wbaztinr8.execute-api.us-east-1.amazonaws.com/prod/suggestion", {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'i love evan' })
+      body: JSON.stringify({suggestion})
     });
-    const jsonData = await data.json();
-    setResult(jsonData);
   };
 
-  function submitSuggestion() {
-    alert(suggestion);
-  }
   function suggestionInputChange(event:ChangeEvent<HTMLInputElement>) {
     setSuggestion(event.target.value);
   }
+  const voteInputChange = (event:
+    React.ChangeEvent<HTMLInputElement>) => {
+    setVote(event.target.value);
+  };
+  
+  async function postVote() {
+    const data = await fetch("https://0wbaztinr8.execute-api.us-east-1.amazonaws.com/prod/vote", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({vote})
+    });
+    const jsonData = await data.json();
+    const yesCount = jsonData.body.yesCount;
+    const noCount = jsonData.body.noCount;
+    console.log(yesCount)
+    setResult({
+      yesCount: yesCount,
+      noCount: noCount
+    });
+  };
+
 
   return (
-    <div className="App">
+    <div>
+      <div>
+        <a href="https://5pm.fyi/" target="_blank">
+          <img src="https://www.coorslight.com/sites/coorslight/files/inline-images/coorslight-can.png" className="logo" alt="Vite logo" />
+        </a>
+      </div>
+
+      <h2>Is Coors Water?</h2>
+      <fieldset>
+          <input 
+            type="radio" 
+            name="vote"
+            id="voteYes" 
+            value="yes"
+            
+            onChange={voteInputChange}
+          />
+          <label htmlFor='yes'>
+            yes
+            </label>
+
+          <input 
+            type="radio" 
+            name="vote"
+            id="voteNo" 
+            value="no"
+            
+            onChange={voteInputChange}
+          /><label htmlFor='no'>no</label>
+          <button onClick={() => postVote()}>
+            Submit
+            </button>
+        </fieldset>
+      
+      <h2>Results</h2>
+        <p>
+          Coors is Water: {result?.yesCount} votes
+        </p>
+        <p>
+          Coors is NOT Water: {result?.noCount} votes
+          </p>
+
       <div>
         <form>
           <input 
@@ -39,40 +95,11 @@ function App() {
             placeholder="Type your suggestion"
             onChange={suggestionInputChange}
           />
-          <button type="submit" onClick={submitSuggestion}>
-            Submit
-          </button>
         </form>
+        <button onClick={() => postSuggestion()}>
+          Submit
+          </button>
       </div>
-
-      <div>
-        <div>{result?.statusCode}</div>
-        <div>{result?.body}</div>
-      </div>
-
-      <div>
-        <a href="https://5pm.fyi/" target="_blank">
-          <img src="https://www.coorslight.com/sites/coorslight/files/inline-images/coorslight-can.png" className="logo" alt="Vite logo" />
-        </a>
-      </div>
-
-      <h1>Coors is Water</h1>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          vote count is {count}
-        </button>
-      </div>
-
-      <div>
-        <button onClick={() => getStatus()}>
-          status code is {result?.statusCode}
-        </button>
-      </div>
-
-      <p className="read-the-docs">
-        Click on the can to learn more
-      </p>
 
     </div>
   )
